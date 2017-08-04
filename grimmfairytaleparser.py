@@ -3,18 +3,14 @@
    "fables": {
      "short": [
       {
-         "title": "the story's text here"
+         "title": "title here",
+         "text": "text here
       },
-      {
-         "title": "the story's text here"
-      },
-      {
-         "title": "the story's text here"
-      }
     ],
    "long": [
      {
-       "title": "the story's text here"
+         "title": "title here",
+         "text": "text here
      }
     ]
    }
@@ -23,8 +19,10 @@ the rest of this was written by Jesse Gao, the guy that spent 20 min figuring ou
 scan for a title
 """
 #file name goes here
-fname = "grimm10a.txt"
-longStoryThreshold = 30
+fname = "grimm10.txt"
+#write-to file name goes here
+newFile = "fairyTales.json"
+longStoryThreshold = 2000
 #assumes that the main story comes after a title, so I will never scan an actual story
 #the title doesnt have a period
 def detectTitle(string):
@@ -49,9 +47,11 @@ with open(fname) as f:
 	lon = [] #cant write long
 	#tracks title detection
 	detected = False
-	story = ""
+	story = []
+	title = []
 	countNewLines = 0 #counts how many newlines for detecting titles
-	countStoryLength #counts lines in story
+	countStoryLength = 0 #counts lines in story
+	s = "" #string that holds parts of the story
 
 	for line in lines:
 		"""if detected and line:
@@ -62,33 +62,61 @@ with open(fname) as f:
 			if line =="\n":
 				pass
 				detected = True"""
-		if !line:
+		if not line:
 			countNewLines += 1
-		elif line and countNewLines == 3 and is_number(line[0]):
-			if story:
-				story = "fairy tale number " story + "\""
+			if countNewLines == 3 and s:
+				story.append(s)
+				s = ""
+		elif line and countNewLines == 3 :
+			"""if story:
+				story = "fairy tale number " + story + "\""
 				if countStoryLength < longStoryThreshold:
 					short.append([story])
 				else:
 					lon.append([story])
-				story = ""
+				story = """
 			#is title
-			story += ("\"" + line +  "\":\"")
+			#story += ("\"title\": \"" + line.replace("\"", "'") +  "\":\"")
+			title.append(line.replace("\"", "'"))
+			countNewLines = 0
 		else:
-			story += ("" + line.replace("\"", "'") +  "\n")
+			s += line.replace("\"", "'") + " \n"
+			countNewLines = 0
 
-	json += "\"short\": ["
+	"""json += "\"short\": ["
+				for s in short:
+					json += "{" + s + "},"
+				json += "]"
+			
+				json += "\"long\": ["
+				for s in lon:
+					json += "{" + s + "},"
+				json += "]"""
+
+	if len(title) != len(story) :
+		print("your list lengths don't match")
+
+	for t, s in zip(title, story):
+		formatted = "{\"title\": \"%s\",\"text\": \"%s\"},"%(t,s)
+		if len(formatted) < longStoryThreshold:
+			short.append(formatted)
+		else:
+			lon.append(formatted)
+
+	print(str(len(lon)) + str(len(short)))
+
+	json += "{\"short\": ["
 	for s in short:
-		json += "{" + s + "},"
-	json += "]"
+		json += s
+	json += "]},"
 
-	json += "\"long\": ["
+	json += "{\"long\": ["
 	for s in lon:
-		json += "{" + s + "},"
-	json += "]"
-
+		json += s
+	json += "]}"
 	json += "\n}"
-	file = open('fairyTales.json', 'w+')
+
+	file = open(newFile, 'w+')
 	file.write(json)
 	file.close()
 	print("done!")
