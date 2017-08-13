@@ -25,7 +25,7 @@ name = input("Please type the name of the file to be scanned (without the .txt p
 newFile = name + ".json"
 fname = name + ".txt"
 longStoryThreshold = 2000
-lineSpacing = 4 #this is the amount of line spacing between each story
+lineSpacing = int(input("number of spaces")) #this is the amount of line spacing between each story
 #assumes that the main story comes after a title, so I will never scan an actual story
 #the title doesnt have a period
 def detectTitle(string):
@@ -45,7 +45,7 @@ def is_number(s):
 
 with open(fname, encoding = "utf8") as f:
 	lines = [line.rstrip('\n') for line in f]
-	json = "{\"fairy tales\": "
+	json = "{\"%s\": "%(name)
 	short = []
 	lon = [] #cant write long
 	#tracks title detection
@@ -68,9 +68,9 @@ with open(fname, encoding = "utf8") as f:
 		if not line:
 			countNewLines += 1
 			if countNewLines == lineSpacing and s:
-				story.append(s)
+				story.append(s.replace("\"", "'"))
 				s = ""
-		elif line and countNewLines == lineSpacing :
+		elif line and countNewLines >= lineSpacing :
 			"""if story:
 				story = "fairy tale number " + story + "\""
 				if countStoryLength < longStoryThreshold:
@@ -83,7 +83,7 @@ with open(fname, encoding = "utf8") as f:
 			title.append(line.replace("\"", "'"))
 			countNewLines = 0
 		else:
-			s += line.replace("\"", "'") + " \n"
+			s += line.replace("\"", "'") + " "
 			countNewLines = 0
 
 	"""json += "\"short\": ["
@@ -106,7 +106,7 @@ with open(fname, encoding = "utf8") as f:
 		else:
 			lon.append(formatted)
 
-	print(str(len(lon)) + str(len(short)))
+	print(str(len(lon)) + ' ' + str(len(short)))
 
 	json += "{\"short\": ["
 	for s in short:
